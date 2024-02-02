@@ -2,14 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
-
+using PathCreation;
 public class SkateboardController : MonoBehaviour {
    
     //player position
     public Transform m_skateboard;
-    public Transform front_ray;
-    public Transform back_ray;
     public Collider wall_hit;
+    public Collider front_detector;
+    public Collider back_detector;
+    public PathCreator rail;
+    public EndOfPathInstruction end;
     
     public float m_rayDistance = 2f;
     public float m_surfDistance = 2f;
@@ -25,13 +27,15 @@ public class SkateboardController : MonoBehaviour {
     public float topSpeed = 70;
     private float m_Forward;
     private float current_Direction = 1f;
-   
+    float distanceTravelled;
+        
    //turning
     public float m_TurnForce = 3;
     private int turn_controller = 2;
     private float m_Turn;
     private Vector3 face_Turn;
     private bool halfpipe = false;
+    private bool halfpipe_in_progress = false;
     private Quaternion rotation;
 
 
@@ -100,10 +104,6 @@ public class SkateboardController : MonoBehaviour {
             space_Hold = false;
         }
 
-        if (Input.GetButtonDown("Halfpipe")){
-            halfpipe = true;
-        }
-
         m_Forward = Input.GetAxis("Vertical");
         m_Turn = Input.GetAxis("Horizontal");
 
@@ -114,11 +114,13 @@ public class SkateboardController : MonoBehaviour {
 
 
         //turn 180 degrees and convert all momentum to upwards
-        if (halfpipe) {
+        if (halfpipe && !halfpipe_in_progress && m_rigidbody.velocity.y > 0) {
+            halfpipe_in_progress = true;
             turningFrames = 36;
             face_Turn = -transform.forward;
-            m_rigidbody.velocity = new Vector3(0, 1, 0) * m_rigidbody.velocity.magnitude;
-            m_rigidbody.AddForce(face_Turn * 50);
+            m_rigidbody.velocity = new Vector3(0, 1, 0) * m_rigidbody.velocity.magnitude ;
+            m_rigidbody.MovePosition(transform.position + face_Turn * .2f);
+            //m_rigidbody.AddForce(face_Turn * 25);
             halfpipe = false;
         }
 
@@ -141,6 +143,9 @@ public class SkateboardController : MonoBehaviour {
             //automatic turning
             if (turningFrames > 0){
                 turningFrames--;
+                if (turningFrames < 1) {
+                    halfpipe_in_progress = false;
+                }
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(face_Turn, Vector3.up), 5);
             } else {
                 //turn when you hold left and right
@@ -221,7 +226,7 @@ public class SkateboardController : MonoBehaviour {
             //add momentum
             if (new Vector3(m_rigidbody.velocity.x, 0, m_rigidbody.velocity.z).magnitude < topSpeed) {
                 
-                if (new Vector3(m_rigidbody.velocity.x, 0, m_rigidbody.velocity.z).magnitude < 20f) {
+                if (m_rigidbody.velocity.magnitude < 20f) {
                     
                     if (m_onSurface && turningFrames == 0) {
                         if (m_Forward == 1) {
@@ -262,25 +267,41 @@ public class SkateboardController : MonoBehaviour {
     }
 
     void AlignToSurface() {
-        var bHit = new RaycastHit();
-        var fHit = new RaycastHit();
         var hit = new RaycastHit();
-
-
         var onSurface = Physics.Raycast(transform.position, Vector3.down, out hit, m_surfDistance);
-        var frontHit = Physics.Raycast(front_ray.position, Vector3.down, out fHit, m_rayDistance);
-        var backHit = Physics.Raycast(back_ray.position, Vector3.down, out bHit, m_rayDistance);
         if (onSurface) {
             m_current_jumps = m_jumps;
         }        
+    }
+     private void Grind() {
+        if (rail != null) {
+            distanceTravelled += m_rigidbody.velocity.magnitude * Time.deltaTime;
+            Debug.Log(rail);
+            m_rigidbody.position = rail.path.GetPointAtDistance(distanceTravelled, end);
+        m_rigidbody.rotation = rail.path.GetRotationAtDistance(distanceTravelled, end);
+        }
     }
     
     void UnlockAttack(){
         lock_attack = false;
     }
     void OnTriggerEnter(Collider triggerData) {  
-        Debug.Log(m_rigidbody.velocity.magnitude);
-    
+        if (triggerData.GetComponent<Collider>().gameObject.layer == 7) {
+            if (front_detector.bounds.Intersects((triggerData.bounds))) {
+                halfpipe = true;
+            }
+            if (back_detector.bounds.Intersects((triggerData.bounds)) && m_rigidbody.velocity.y < 0) {
+                m_rigidbody.velocity = m_rigidbody.velocity * 1.3f;
+            }
+        }
+
+        if (triggerData.GetComponent<Collider>().gameObject.layer == 6) {
+            rail = triggerData.GetComponent<PathCreator>();
+            if (space_Hold){
+                Grind();
+            }
+        }   
+
         var wallHitInfo = new RaycastHit();
         var forwardRay = new Ray(m_skateboard.position, m_skateboard.forward);
         var goodAngle = triggerData.Raycast(forwardRay, out wallHitInfo,5f);
@@ -305,7 +326,7 @@ public class SkateboardController : MonoBehaviour {
                 wall_Run_Vector = 1.2f * face_New_Direction * (float)Math.Sqrt((m_rigidbody.velocity.x * m_rigidbody.velocity.x) + ( m_rigidbody.velocity.z *  m_rigidbody.velocity.z));
             }
         }
-            
+
     }
     void OnTriggerExit(Collider triggerData) {
         wall_Running = false;
