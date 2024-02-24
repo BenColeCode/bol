@@ -115,6 +115,7 @@
 -define:ENABLE_TILEMAP
 -define:ENABLE_TIMELINE
 -define:ENABLE_LEGACY_INPUT_MANAGER
+-define:PROBUILDER_EXPERIMENTAL_FEATURES
 -define:CSHARP_7_OR_LATER
 -define:CSHARP_7_3_OR_NEWER
 -r:"C:/Program Files/Unity/Hub/Editor/2021.3.6f1/Editor/Data/Managed/UnityEngine/UnityEditor.CoreModule.dll"
@@ -364,6 +365,7 @@
 "Assets/PathCreator/Examples/Scripts/PathSceneTool.cs"
 "Assets/PathCreator/Examples/Scripts/PathSpawner.cs"
 "Assets/PathCreator/Examples/Scripts/RoadMeshCreator.cs"
+"Assets/Scripts/Player/ActionsReceiver.cs"
 "Assets/Scripts/Player/SkateboardController.cs"
 "Assets/Scripts/World/Rail.cs"
 -langversion:9.0
