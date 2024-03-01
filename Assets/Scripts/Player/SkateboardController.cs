@@ -4,7 +4,6 @@ using System;
 using UnityEngine;
 using PathCreation;
 public class SkateboardController : MonoBehaviour {
-   
     //player position
     public Transform m_skateboard;
     public Collider wall_hit;
@@ -14,20 +13,23 @@ public class SkateboardController : MonoBehaviour {
     private PathCreator rail;
     public EndOfPathInstruction rule;
     public Transform m_mesh;
+    public Transform projectedRotation;
+
     public Transform positioner;
     
+
+    //All four of these are used to define the angle of the visible rotateable mesh
     public Transform back_Ray;
     public Transform front_Ray;
     public Transform left_Ray;
     public Transform right_Ray;
-    Quaternion defaultRotation;
-    
-    public float m_rayDistance = 2f;
+
+
+    // at this distance to the surface, jumps reset
     public float m_surfDistance = 2f;
     public bool m_onSurface;
     public Animator m_animator;
-    
-    private Collision m_surfaceCollisionInfo;
+    //rigidbody of player
     private Rigidbody m_rigidbody;
     
    
@@ -37,6 +39,8 @@ public class SkateboardController : MonoBehaviour {
     private float m_Forward;
     private float current_Direction = 1f;
     private Quaternion settingLookAngle;
+    private bool canPedal;
+
     
 
     //grinding
@@ -58,6 +62,7 @@ public class SkateboardController : MonoBehaviour {
     private bool halfpipe = false;
     private bool halfpipe_in_progress = false;
     private Quaternion rotation;
+    private Quaternion targetRotation;
 
 
     //wall running
@@ -66,6 +71,8 @@ public class SkateboardController : MonoBehaviour {
     private Vector3 face_New_Direction;
     private int turningFrames; 
     private Vector3 side1;
+    public Collider wallCollider;
+
 
     //jumping
     public float m_JumpForce = 10;
@@ -80,75 +87,59 @@ public class SkateboardController : MonoBehaviour {
     //attacking
     private bool m_Attack = false;
     private bool m_SpinAttack = false;
+    private bool m_MovementAttack = false;
     private bool m_spinning = false;
-    
     private bool lock_attack = false;
+    private float spin_radians;
+    
 
     // Start is called before the first frame update
     void Start() {
         m_rigidbody = GetComponent<Rigidbody>();
         wall_hit = GetComponent<Collider>();
         m_animator = GetComponentInChildren<Animator>();
-        defaultRotation = m_mesh.rotation;
-
     }
           
-    // Update is called once per frame
+    // Update is called 50 times per second
     void Update() { 
         ProcessInputs();
-        if (!m_SpinAttack){
-            m_mesh.rotation = Quaternion.RotateTowards(m_mesh.rotation, settingLookAngle, .5f); 
-        }
     }
 
+    //fixedupdate is called once per frame based on 
     private void FixedUpdate() {
         ProcessForce();
-        if (m_Attack && !lock_attack && !m_SpinAttack ) { 
-            m_animator.SetTrigger("TrAttack");
-            lock_attack = true;
-            m_Attack = false;
+        attackLogic();
+        if (!wall_Running){
+            rotateMesh();
         }
-        if (m_SpinAttack && !lock_attack) {
-            if (!m_spinning){
-                m_animator.SetTrigger("TrGoToSpinAttack");
-            }
-            
-            m_mesh.rotation = m_mesh.rotation * Quaternion.AngleAxis(25, m_mesh.up);
-            m_spinning = true;
-
-        }
-        rotateMesh();
-
-
-
 
     }
 
     private void ProcessInputs() {
-        if(Input.GetMouseButtonDown(0)){
+        if(Input.GetButton("Fire1") && !lock_attack && !m_spinning){
+            lock_attack = true;
             m_Attack = true;
         }
         
-        if(Input.GetMouseButton(1)){
+        if(Input.GetButton("Fire2") && !lock_attack){
             m_SpinAttack = true;
         } else {
             m_SpinAttack = false;
-            if (m_spinning) {
-                m_animator.SetTrigger("TrStopSpinning");
-                m_animator.SetTrigger("TrIdle");
-                m_mesh.rotation = settingLookAngle;
-            }
             m_spinning = false;
-            lock_attack = false;
-
         }
         
+        if(Input.GetButtonDown("Fire3")){
+            canPedal = false;
+            m_MovementAttack = true;
+        }
+
         if (Input.GetButtonDown("Jump")){
             space_Hold = true;
             if (m_current_jumps > 0) {
                 m_Jump = true;
             }
         }
+
         if (Input.GetButtonUp("Jump")){
             space_Hold = false;
         }
@@ -166,7 +157,7 @@ public class SkateboardController : MonoBehaviour {
         } 
         if (halfpipe) {
             halfpipe = false;
-            if ( m_rigidbody.velocity.y > 5){                
+            if ( m_rigidbody.velocity.y > 5){
                 doHalfPipe();
             }
         } else if (wall_Running) {
@@ -204,39 +195,41 @@ public class SkateboardController : MonoBehaviour {
     }
 
     private void turningLogic() {
-               
-        if (m_Turn > 0) {
-             if (turn_controller != 0) {
-                m_animator.SetTrigger("TrLeanRight");
+        
+        if (!grabbing_board) {
+            if (m_Turn > 0) {
+                if (turn_controller != 0) {
+                    m_animator.SetTrigger("TrLeanRight");
+                }
+                turn_controller = 0;
+                
             }
-            turn_controller = 0;
+            if (m_Turn < 0) {
+                if (turn_controller != 1) {
+                    m_animator.SetTrigger("TrLeanLeft");
+                }
+                turn_controller = 1;
             
-        }
-        if (m_Turn < 0) {
-            if (turn_controller != 1) {
-                m_animator.SetTrigger("TrLeanLeft");
             }
-            turn_controller = 1;
-           
-        }
-         if(m_Turn == 0) {
-            if (turn_controller != 2){
-                m_animator.SetTrigger("TrIdle");
+            if(m_Turn == 0) {
+                if (turn_controller != 2){
+                    m_animator.SetTrigger("TrIdle");
+                }
+                turn_controller = 2;
+                
             }
-            turn_controller = 2;
-            
         }
- 
+
         if (m_onSurface) {
             transform.Rotate(new Vector3(0, m_TurnForce * m_Turn, 0), Space.Self);
         } else {
-            transform.Rotate(new Vector3(0, m_TurnForce * .25f * m_Turn, 0), Space.Self);            
+            transform.Rotate(new Vector3(0, m_TurnForce * .25f * m_Turn, 0), Space.Self);
         }
     }
 
     private void normalMovement() {
         var yVel = m_rigidbody.velocity.y;
-        if (m_onSurface) {                
+        if (m_onSurface) { 
             var newVel = new Vector3(transform.forward.x, 0, transform.forward.z).normalized * (float)Math.Sqrt((m_rigidbody.velocity.x * m_rigidbody.velocity.x) + ( m_rigidbody.velocity.z *  m_rigidbody.velocity.z));
             newVel.y = yVel;
 
@@ -257,8 +250,7 @@ public class SkateboardController : MonoBehaviour {
             if (new Vector3(m_rigidbody.velocity.x, 0, m_rigidbody.velocity.z).magnitude < topSpeed) {
                 
                 if (m_rigidbody.velocity.magnitude < 20f) {
-                    
-                    if (m_onSurface && turningFrames == 0) {
+                    if (m_onSurface && turningFrames == 0 && canPedal) {
                         if (m_Forward == 1) {
                             m_animator.SetTrigger("TrPushoff");
                         }
@@ -288,10 +280,11 @@ public class SkateboardController : MonoBehaviour {
             }
         }
         m_Jump=false;
-
     }
-    private void StartGrind() {    
-        if (rail != null) {   
+
+    private void StartGrind() {
+        if (rail != null) {
+            m_animator.SetTrigger("ZeroOut");
             m_animator.SetTrigger("TrGotoGrind");
 
             if (rail.path.isClosedLoop) {
@@ -311,7 +304,8 @@ public class SkateboardController : MonoBehaviour {
             var last_point= rail.path.GetPointAtDistance((distanceTravelled - grind_Speed), rule); 
 
             var nextAngle= Mathf.Abs(Vector3.SignedAngle((next_point-starting_point).normalized, m_skateboard.forward, Vector3.up));
-            var lastAngle= Mathf.Abs(Vector3.SignedAngle((last_point-starting_point).normalized, m_skateboard.forward, Vector3.up));    
+            var lastAngle= Mathf.Abs(Vector3.SignedAngle((last_point-starting_point).normalized, m_skateboard.forward, Vector3.up));
+       
 
             grindDir = 1;
             if (nextAngle > lastAngle) {
@@ -320,51 +314,74 @@ public class SkateboardController : MonoBehaviour {
 
         }
     }
-    private void snapToRail() {  
+    private void snapToRail() {
         var snapPoint = rail.path.GetPointAtDistance(distanceTravelled, rule);
         snapPoint = new Vector3(snapPoint.x,snapPoint.y + .1f,snapPoint.z);
         if (Vector3.Distance(m_rigidbody.position, snapPoint) < 1) {
             starting_grind = false;
         } else {
-            m_rigidbody.MovePosition(Vector3.MoveTowards(m_rigidbody.position, snapPoint, grind_Speed * Time.deltaTime));
-            ///Vector3.Distance(m_rigidbody.position, snapPoint)));
+            m_rigidbody.MovePosition(Vector3.MoveTowards(m_rigidbody.position, snapPoint, grind_Speed / Vector3.Distance(m_rigidbody.position, snapPoint)));
         }
-    }
-    private void faceToRail() {   
-        var targetRotation = rail.path.GetRotationAtDistance(distanceTravelled, rule);
-        if (grindDir == -1) {    
-           targetRotation = rail.path.GetReversedRotationAtDistance(distanceTravelled, rule);
-        }
-
-        if (m_rigidbody.rotation == targetRotation) {
-            starting_to_turn = false;
-        } else {
-          
-            m_rigidbody.rotation = Quaternion.RotateTowards(m_rigidbody.rotation, targetRotation, 4);
-        }
-    }
-    private void grindingMovement() {  
-
-        distanceTravelled += (grind_Speed * Time.deltaTime * grindDir);
-        var nextPoint = rail.path.GetPointAtDistance(distanceTravelled, rule);
-
-        if ((space_Hold && rail != null) && !(!rail.path.isClosedLoop && ((nextPoint == rail.path.GetPointAtTime(0, rule) && grindDir < 0) || (nextPoint == rail.path.GetPointAtTime(1, rule) && grindDir > 0)))){               
-            m_rigidbody.position = nextPoint;
-            if (starting_to_turn) {
+        
+         if (starting_to_turn) {
                 faceToRail();
             } else {
-            if (grindDir == -1) {    
+            if (grindDir == -1) {
                 m_rigidbody.rotation = rail.path.GetReversedRotationAtDistance(distanceTravelled, rule);
             } else {
                 m_rigidbody.rotation = rail.path.GetRotationAtDistance(distanceTravelled, rule);
             }
         }
+
+
+    }
+    private void faceToRail() {
+        var targetRotation = rail.path.GetRotationAtDistance(distanceTravelled, rule);
+        if (grindDir == -1) {
+           targetRotation = rail.path.GetReversedRotationAtDistance(distanceTravelled, rule);
+        }
+
+        if (m_rigidbody.rotation != targetRotation) {
+            m_rigidbody.rotation = Quaternion.RotateTowards(m_rigidbody.rotation, targetRotation, 5);
+        }
+        if (m_rigidbody.rotation == targetRotation) {
+            starting_to_turn = false;
+        }
+
+    }
+    private void grindingMovement() {
+        distanceTravelled += (grind_Speed * Time.deltaTime * grindDir);
+
+            if (starting_to_turn) {
+                faceToRail();
+            } else {    
+                if (grindDir == -1) {
+                    m_rigidbody.rotation = rail.path.GetReversedRotationAtDistance(distanceTravelled, rule);
+                } else {
+                    m_rigidbody.rotation = rail.path.GetRotationAtDistance(distanceTravelled, rule);
+                }
+            }
+
+        var prevPoint = rail.path.GetPointAtDistance(distanceTravelled - (2 * (grind_Speed * Time.deltaTime * grindDir)), rule);
+        var nextPoint = rail.path.GetPointAtDistance(distanceTravelled, rule);
+
+        if (space_Hold && rail != null && !(!rail.path.isClosedLoop && ((nextPoint == rail.path.GetPointAtTime(0, rule) && grindDir < 0) || (nextPoint == rail.path.GetPointAtTime(1, rule) && grindDir > 0)))){
+            if (starting_to_turn) {
+                faceToRail();
+            } else {    
+                if (grindDir == -1) {
+                    m_rigidbody.rotation = rail.path.GetReversedRotationAtDistance(distanceTravelled, rule);
+                } else {
+                    m_rigidbody.rotation = rail.path.GetRotationAtDistance(distanceTravelled, rule);
+                }
+            }
+            m_rigidbody.position = nextPoint;
         } else {
             stopGrinding();
         }
     }
 
-    private void stopGrinding() {   
+    private void stopGrinding() {
       
         starting_grind = false;
         starting_to_turn =false;
@@ -374,7 +391,7 @@ public class SkateboardController : MonoBehaviour {
         //speed up a little on the dismount
         m_rigidbody.velocity = (m_skateboard.forward).normalized * grind_Speed * 1.2f;
         //dont bump the rail
-        m_rigidbody.MovePosition(transform.position + Vector3.up);
+       // m_rigidbody.MovePosition(transform.position + Vector3.up);
         //jump
         m_rigidbody.AddForce(0, m_JumpForce * 1.2f, 0);
         m_animator.SetTrigger("TrDoubleJump");
@@ -382,23 +399,24 @@ public class SkateboardController : MonoBehaviour {
         rail = null;
     }
 
-    private void wallRunningMovement() {        
-        if (!space_Hold) {
+    private void wallRunningMovement() {
+        if (!space_Hold || Vector3.Distance(wallCollider.ClosestPoint(m_rigidbody.position), m_rigidbody.position) > 1) {
             endWallRun();
             wall_Running=false;
-        } else {    
+            m_animator.SetTrigger("ZeroOut");
+        } else {
             m_rigidbody.velocity = wall_Run_Vector;
-            settingLookAngle = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(wall_Run_Vector, Vector3.up), 5);
         }
     }
     private void doHalfPipe() {
             halfpipe_in_progress = true;
             m_animator.SetTrigger("TrBoardGrab");
+            grabbing_board = true;
             m_rigidbody.velocity = new Vector3(0, 1, 0) * m_rigidbody.velocity.magnitude ;
             m_rigidbody.MovePosition(transform.position + -transform.forward * .2f);
 
     }
-    private void autoTurning() {        
+    private void autoTurning() {
         turningFrames--;
         if (turningFrames < 1) {
             halfpipe_in_progress = false;
@@ -407,21 +425,17 @@ public class SkateboardController : MonoBehaviour {
 
     }
     
-    private void endWallRun() {    
+    private void endWallRun() {
         turningFrames = 9;
         m_rigidbody.AddForce(0, m_JumpForce, 0);
-        m_animator.SetTrigger("TrIdle");
         m_animator.SetTrigger("TrDoubleJump");
-
     }
     
     private void OnCollisionStay(Collision other) {
         m_onSurface = true;
-        m_surfaceCollisionInfo = other;
     }
 
     private void OnCollisionExit(Collision other) {
-        m_surfaceCollisionInfo = null;
         m_onSurface = false;
         m_animator.SetTrigger("TrStopPushing");
 
@@ -450,46 +464,49 @@ public class SkateboardController : MonoBehaviour {
         var VerticalLeanAngle = front.point - back.point ;
         var HorizontalLeanAngle = left.point - right.point ;
         
+        if (Vector3.Distance(front.point, front_Ray.position) > 10f && Vector3.Distance(back.point, back_Ray.position) > 10f) {
+            if (!grabbing_board){
+                m_animator.SetTrigger("TrBoardGrab");
+                grabbing_board = true;
+            }
+        } else if  (Vector3.Distance(front.point, front_Ray.position) < 6f && Vector3.Distance(back.point, back_Ray.position) < 6f) {
+                if (grabbing_board){
+                    m_animator.SetTrigger("TrStopGrabbing");
+                    grabbing_board = false;
+            }
+        }
 
-        if (!grinding && !wall_Running){
-            var rot = m_mesh.rotation;
+        var rot = projectedRotation.rotation;
+        if (!grinding){
             var viewAngle = Mathf.Abs(Vector3.Angle(VerticalLeanAngle.normalized, m_skateboard.forward));
             var sideAngle = Mathf.Abs(Vector3.Angle(HorizontalLeanAngle.normalized, -m_skateboard.right));
 
-            if (front.point.y > back.point.y) {   
+            if (front.point.y > back.point.y) {
                 viewAngle = -viewAngle;
             }
             if (left.point.y > right.point.y) {
                 sideAngle = -sideAngle;
             }
         
-            if (Vector3.Distance(front.point, front_Ray.position) > 7f && Vector3.Distance(back.point, back_Ray.position) > 7f) {
-                if (!grabbing_board) {
-                    m_animator.SetTrigger("TrBoardGrab");
-                }
-                grabbing_board = true;
-            } else {
-                if (grabbing_board) {
-                    grabbing_board = false;
-                    m_animator.SetTrigger("TrIdle");
-                }
-            }
-
             rot.eulerAngles = new Vector3(viewAngle, m_skateboard.rotation.eulerAngles.y, sideAngle);
-
-            settingLookAngle = rot;
-
-
         } else {
-            var rot = m_mesh.rotation;
             rot.eulerAngles = new Vector3(m_skateboard.rotation.eulerAngles.x, m_skateboard.rotation.eulerAngles.y, m_skateboard.rotation.eulerAngles.z);
-            settingLookAngle = rot;
+        }
+        settingLookAngle = rot;
+
+
+        projectedRotation.rotation = Quaternion.RotateTowards(projectedRotation.rotation, settingLookAngle, 5f);
+        if (!m_SpinAttack) {
+            m_mesh.rotation = projectedRotation.rotation;
+        } else if (m_SpinAttack) {
+            spin_radians = (spin_radians + 25) % 360;    
+            m_mesh.rotation = projectedRotation.rotation;
+            m_mesh.RotateAround(projectedRotation.position, projectedRotation.up, spin_radians);
+            
         }
     }
     
-    void UnlockAttack(){
-        lock_attack = false;
-    }
+
 
     void startHalfpipe(Collider triggerData){
 
@@ -523,7 +540,7 @@ public class SkateboardController : MonoBehaviour {
 
         if (triggerData.GetComponent<Collider>().gameObject.layer == 6) {
             if (rail_detector.bounds.Intersects((triggerData.bounds))) {
-                if (space_Hold && !starting_grind){
+                if (space_Hold && !starting_grind && !starting_to_turn && !grinding){
                     if (triggerData.GetComponent<Collider>().gameObject.GetComponentInChildren<PathCreator>() != null) {
                         rail = triggerData.GetComponent<Collider>().gameObject.GetComponentInChildren<PathCreator>();
                     }
@@ -533,11 +550,11 @@ public class SkateboardController : MonoBehaviour {
         }   
 
         if (wall_hit.bounds.Intersects((triggerData.bounds)) && triggerData.GetComponent<Collider>().GetType() == typeof(MeshCollider) && triggerData.GetComponentInChildren<MeshCollider>().convex ) {
+            wallCollider = triggerData.GetComponent<Collider>();
             var wallHitInfo = new RaycastHit();
             var forwardRay = new Ray(m_skateboard.position, m_skateboard.forward);
             var goodAngle = triggerData.Raycast(forwardRay, out wallHitInfo,5f);
             if (goodAngle) {
-
                 var p0=m_skateboard.position;
                 var p1=triggerData.ClosestPoint(m_skateboard.position);
                 var p2=wallHitInfo.point;
@@ -550,26 +567,64 @@ public class SkateboardController : MonoBehaviour {
                 face_Turn = (p0 - p1).normalized;
                 face_New_Direction = (p2-p1).normalized;
                 if (wall_Run_Angle > 20 && m_rigidbody.velocity.magnitude > 20 && space_Hold) {
-
+                    //m_rigidbody.MovePosition(p1);
+                    m_rigidbody.MovePosition(Vector3.MoveTowards(m_rigidbody.position, p1, m_rigidbody.velocity.magnitude));
                     wall_Running = true;
                     m_current_jumps = m_jumps;
-
+                    
                     wall_Run_Vector = 1.2f * face_New_Direction * (float)Math.Sqrt((m_rigidbody.velocity.x * m_rigidbody.velocity.x) + ( m_rigidbody.velocity.z *  m_rigidbody.velocity.z));
-                    if((Vector3.Distance(p1,left_Ray.position) > Vector3.Distance(p1,right_Ray.position))) {
+
+                    
+                    Vector3 rotationToFront;
+                    if(Vector3.Distance(wallCollider.ClosestPoint(left_Ray.position),left_Ray.position) > Vector3.Distance(wallCollider.ClosestPoint(right_Ray.position),right_Ray.position)) {
                         m_animator.SetTrigger("WallrideRight");
+                        m_mesh.rotation = Quaternion.Euler(m_mesh.eulerAngles.x, m_mesh.eulerAngles.y, 90-wall_Run_Angle);
+
                     } else {
                         m_animator.SetTrigger("WallrideLeft");
+                        rotationToFront = new Vector3(0,-(90-wall_Run_Angle),0);
                     }
-
                 }
             }
         }
 
     }
-    void OnTriggerExit(Collider triggerData) {
-        wall_Running = false;
-    }
 
+    private void movementAttack() {
+        canPedal = false;
+        m_animator.SetTrigger("TrCharge");
+        m_rigidbody.AddForce(m_skateboard.forward * 4000f);
+        if (grinding) {
+            stopGrinding();
+        }
+    }
+    private void EndCharge() {
+        m_animator.SetTrigger("ZeroOut");
+        canPedal = true;
+
+    }
+    void UnlockAttack(){
+        lock_attack = false;
+    }
+    private void attackLogic() {
+        if (m_Attack && !m_spinning) { 
+            m_Attack = false;
+            m_animator.SetTrigger("TrAttack");
+        } else if (m_SpinAttack && !lock_attack) {
+            m_animator.SetTrigger("TrSpinAttack");
+            m_spinning = true;
+        }
+
+        if (m_MovementAttack) {
+            movementAttack();
+            m_MovementAttack = false;
+        }
+
+        if (!m_spinning) {
+            m_animator.SetTrigger("TrStopSpinning");
+            spin_radians = 0;
+        }
+    }
 
 
 }

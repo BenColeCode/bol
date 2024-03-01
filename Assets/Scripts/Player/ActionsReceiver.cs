@@ -4,14 +4,9 @@ using UnityEngine;
 
 public class ActionsReceiver : MonoBehaviour
 {
-     public GameObject target;
-
-    public string message;
-
-    public void UnlockAttack()
-    {
-        if (target != null)
-        {
+    public GameObject target;
+    public void UnlockAttack() {
+        if (target != null) {
             target.SendMessage("UnlockAttack", SendMessageOptions.RequireReceiver);
         }
     }
