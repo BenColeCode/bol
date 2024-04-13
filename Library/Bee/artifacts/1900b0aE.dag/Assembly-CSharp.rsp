@@ -365,9 +365,14 @@
 "Assets/PathCreator/Examples/Scripts/PathSceneTool.cs"
 "Assets/PathCreator/Examples/Scripts/PathSpawner.cs"
 "Assets/PathCreator/Examples/Scripts/RoadMeshCreator.cs"
+"Assets/Scripts/Items/Common/Acceleration.cs"
+"Assets/Scripts/Items/Common/MaxJumps.cs"
+"Assets/Scripts/Items/Common/TopSpeed.cs"
+"Assets/Scripts/Items/ItemBase.cs"
 "Assets/Scripts/Player/ActionsReceiver.cs"
-"Assets/Scripts/Player/SkateboardController.cs"
-"Assets/Scripts/World/Rail.cs"
+"Assets/Scripts/Player/Player.cs"
+"Assets/Scripts/Player/Sonny/OrcController.cs"
+"Assets/Scripts/World/ItemSpawner.cs"
 -langversion:9.0
 
 /deterministic

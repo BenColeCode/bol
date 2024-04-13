@@ -1,0 +1,160 @@
+fileFormatVersion: 2
+guid: c66a18a710923884cbed59e7b4bdeb58
+ModelImporter:
+  serializedVersion: 21300
+  internalIDToNameTable:
+  - first:
+      74: 771540117647928904
+    second: SpinAttack
+  - first:
+      74: -7662039397377524290
+    second: SpinAttack.001
+  - first:
+      74: -2336661158069492583
+    second: SpinAttack.003
+  - first:
+      74: -7457803631391352614
+    second: SpinAttack.004
+  - first:
+      74: 6659930389112799591
+    second: Skeleton|Attack
+  - first:
+      74: 9179386737744478797
+    second: Skeleton|Charge
+  - first:
+      74: -8884319711753838077
+    second: Skeleton|Grinding
+  - first:
+      74: -790763560421418839
+    second: Skeleton|HoldBoardGrab
+  - first:
+      74: -2420248955592922456
+    second: Skeleton|Idle
+  - first:
+      74: -5126017825441171733
+    second: Skeleton|Jump
+  - first:
+      74: -4119379761668197882
+    second: Skeleton|Kickflip
+  - first:
+      74: -6646674292849499040
+    second: Skeleton|LeaningLeft
+  - first:
+      74: 4614706868543565350
+    second: Skeleton|LeaningRight
+  - first:
+      74: 4388933624515154822
+    second: Skeleton|LeftWallRide
+  - first:
+      74: 237226561858439922
+    second: Skeleton|PushOff
+  - first:
+      74: 1246108227647423958
+    second: Skeleton|RightWallRide
+  - first:
+      74: -6209044290807446879
+    second: Skeleton|SpinAttack
+  - first:
+      74: -4819720383308606828
+    second: Skeleton|SpinAttack.001
+  externalObjects: {}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 1
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
