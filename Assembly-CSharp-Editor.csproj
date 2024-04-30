@@ -739,8 +739,14 @@
     <Reference Include="Unity.VisualScripting.State.Editor">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.VisualScripting.State.Editor.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Searcher.Editor">
+        <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.Searcher.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.VisualScripting.SettingsProvider.Editor">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.VisualScripting.SettingsProvider.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.Runtime">
+        <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.ProBuilder.AddOns.Editor">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.ProBuilder.AddOns.Editor.dll</HintPath>
@@ -763,20 +769,26 @@
     <Reference Include="Unity.Rider.Editor">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.Rider.Editor.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.ShaderLibrary">
+        <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.RenderPipelines.Core.ShaderLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.VisualScripting.Flow">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.VisualScripting.Flow.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.Services.Core">
-        <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.Services.Core.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.VisualScripting.Core">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.VisualScripting.Core.dll</HintPath>
     </Reference>
     <Reference Include="Unity.EditorCoroutines.Editor">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.EditorCoroutines.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core">
+        <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.Services.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.ShaderGraph.Editor">
+        <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.ShaderGraph.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Cinemachine">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Cinemachine.dll</HintPath>
@@ -796,11 +808,17 @@
     <Reference Include="Unity.Services.Core.Environments">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.Services.Core.Environments.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary">
+        <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Timeline.Editor">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.Timeline.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TestTools.CodeCoverage.Editor">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.TestTools.CodeCoverage.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.Editor">
+        <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.RenderPipelines.Core.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.State">
         <HintPath>C:\Users\benja\My project\Library\ScriptAssemblies\Unity.VisualScripting.State.dll</HintPath>
