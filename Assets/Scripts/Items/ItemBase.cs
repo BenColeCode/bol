@@ -24,7 +24,7 @@ public class ItemBase : MonoBehaviour
     protected virtual void Awake ()
     {
         m_Object = GetComponent<Transform> ();
-        textmeshpro = GameObject.Find("Canvas/Text").GetComponent<TextMeshProUGUI>();
+        //textmeshpro = GameObject.Find("Canvas/Text").GetComponent<TextMeshProUGUI>();
     }
 
     void FixedUpdate() {
@@ -69,7 +69,7 @@ public class ItemBase : MonoBehaviour
 
         itemState = ItemState.IsCollected;
         Debug.Log(itemName);
-        textmeshpro.text = itemName;
+        //textmeshpro.text = itemName;
  
         // We must have been collected by a player, store handle to player for later use      
         player = gameObjectCollectingItem.GetComponent<Player> ();

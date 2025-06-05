@@ -375,6 +375,7 @@
 "Assets/Scripts/Items/Common/MaxJumps.cs"
 "Assets/Scripts/Items/Common/TopSpeed.cs"
 "Assets/Scripts/Items/ItemBase.cs"
+"Assets/Scripts/Items/TextFadeAndDelete.cs"
 "Assets/Scripts/Player/ActionsReceiver.cs"
 "Assets/Scripts/Player/Player.cs"
 "Assets/Scripts/Player/Sonny/OrcController.cs"
