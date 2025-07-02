@@ -22,10 +22,13 @@ public class Player : MonoBehaviour
 
     //Text
     public TextMeshProUGUI TextPrefab;
+    public TextMeshProUGUI SubtextPrefab;
     public TextMeshProUGUI ItemText;
+    public TextMeshProUGUI ItemDesc;
     public GameObject Canvas;
 
     //Stats
+    public int StartingMaxHP;
     public int MaxHP;
     public int CurrentHP;
 
@@ -81,19 +84,27 @@ public class Player : MonoBehaviour
     public Transform Camera_Focus;
 
     //jumping
-    public float m_JumpForce = 10;
+    public float m_JumpForce = 20;
     public int m_jumps = 2;
     public int m_current_jumps;
     public bool m_Jump;
     public bool space_Hold;
-    private bool canJump = true;
+    public bool lock_jump = false;
+    public bool canJump = true;
+
+
 
     //attacking
-    public bool m_PrimaryAttack = false;
+    public float damage;
+    public float attack_speed = 1;
+    public bool m_PrimaryAttack = false; 
+    public bool attacking = false;
+
     public bool m_SecondaryAttack = false;
     public bool m_MovementSkill = false;
     public bool lock_attack = false;
     public float spin_radians;
+
 
     //in x seconds, bool = !bool
     public IEnumerator CooldownTimer(float x, bool flip, Action<bool> flipThisBool)
@@ -125,6 +136,8 @@ public class Player : MonoBehaviour
         wall_hit = GetComponent<Collider>();
         m_animator = GetComponentInChildren<Animator>();
         onStart();
+
+        
     }
 
     // Update is called once per frame
@@ -145,38 +158,49 @@ public class Player : MonoBehaviour
 
     }
 
-    void GetItem(string itemName)
+
+    void GetItem(Item info)
     {
-        var newValue = Items.GetValueOrDefault(itemName, 0);
-        Items.Remove(itemName);
-        Items.Add(itemName, newValue + 1);
+        var itemCount = Items.GetValueOrDefault(info.itemName, 0);
+        Items.Remove(info.itemName);
+
+        Items.Add(info.itemName, itemCount + 1);
         ItemText = Instantiate(TextPrefab, Canvas.transform);
-        ItemText.text = itemName;
+        ItemDesc = Instantiate(SubtextPrefab, Canvas.transform);
+        ItemText.text = info.displayName;
+        ItemDesc.text = info.description;
 
         //StatChanges
-        MaxHP = StartingMax + Items.GetValueOrDefault("MaxHPUp", 0);
+        MaxHP = StartingMaxHP + Items.GetValueOrDefault("MaxHPUp", 0);
     }
 
     public virtual void onStart() { }
     public virtual void onFixedUpdate() { }
+    public virtual void ConsecutiveHit() { }
 
     private void ProcessInputs()
     {
         if (Input.GetButton("Pause"))
         {
             Debug.Break();
-            Debug.DrawLine(right_Ray.position, left_Ray.position, Color.red);
-            Debug.DrawLine(front_Ray.position, back_Ray.position, Color.blue);
         }
         if (Input.GetButton("Fire1"))
         {
             m_PrimaryAttack = true;
         }
+        if (Input.GetButtonDown("Fire1"))
+        {
+            attacking = true;
+        }
+        if (Input.GetButtonUp("Fire1"))
+        {
+            attacking = false;
+        }
 
         if (Input.GetButton("Fire2"))
-        {
-            m_SecondaryAttack = true;
-        }
+            {
+                m_SecondaryAttack = true;
+            }
 
         if (Input.GetButtonDown("Fire3"))
         {
@@ -287,7 +311,7 @@ public class Player : MonoBehaviour
     private void normalMovement()
     {
         var givenAcceleration = acceleration + (20 * Items.GetValueOrDefault("Acceleration", 0));
-        var effectiveTopSpeed = topSpeed + (10 * Items.GetValueOrDefault("TopSpeed", 0));
+        var effectiveTopSpeed = topSpeed + (10 * Items.GetValueOrDefault("MaxSpeed", 0));
         var yVel = m_rigidbody.velocity.y;
 
         if (m_onSurface)
@@ -350,6 +374,7 @@ public class Player : MonoBehaviour
         }
 
     }
+    
     private void jumpLogic()
     {
         if (m_Jump)
@@ -367,6 +392,7 @@ public class Player : MonoBehaviour
                     }
                 }
                 m_rigidbody.AddForce(0, m_JumpForce, 0);
+                zeroOut();
                 if (!m_onSurface)
                 {
                     m_animator.SetTrigger("TrDoubleJump");
@@ -758,8 +784,20 @@ public class Player : MonoBehaviour
     {
         lock_attack = false;
     }
+    void UnlockJump()
+    {
+        lock_jump = false;
+    }
+    
     public void zeroOut()
     {
+        foreach (var param in m_animator.parameters)
+        {
+            if (param.type == AnimatorControllerParameterType.Trigger)
+            {
+                m_animator.ResetTrigger(param.name);
+            }
+        }
         m_animator.SetTrigger("ZeroOut");
     }
 

@@ -37,17 +37,21 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\PathCreator\Examples\Scripts\PathSpawner.cs" />
-     <Compile Include="Assets\Scripts\Items\Common\MaxJumps.cs" />
-     <Compile Include="Assets\Scripts\Items\Common\TopSpeed.cs" />
+     <Compile Include="Assets\Scripts\Items\TextFadeAndDeleteBillboard.cs" />
+     <Compile Include="Assets\Scripts\Player\Sonny\PlayerHitbox.cs" />
+     <Compile Include="Assets\Scripts\AnimationScripts\UnlockJump.cs" />
      <Compile Include="Assets\Scripts\Player\Player.cs" />
      <Compile Include="Assets\PathCreator\Examples\Scripts\GeneratePathExample.cs" />
+     <Compile Include="Assets\Scripts\AnimationScripts\UnlockAttack.cs" />
      <Compile Include="Assets\PathCreator\Examples\Scripts\PathPlacer.cs" />
-     <Compile Include="Assets\Scripts\Items\ItemBase.cs" />
-     <Compile Include="Assets\Scripts\Items\Common\Acceleration.cs" />
+     <Compile Include="Assets\Scripts\Items\Item.cs" />
      <Compile Include="Assets\Scripts\Player\ActionsReceiver.cs" />
+     <Compile Include="Assets\Scripts\Player\AnimationDrivenAttack.cs" />
      <Compile Include="Assets\PathCreator\Examples\Scripts\PathSceneTool.cs" />
      <Compile Include="Assets\PathCreator\Examples\Scripts\PathFollower.cs" />
+     <Compile Include="Assets\Scripts\Enemy\Harpy.cs" />
      <Compile Include="Assets\Scripts\World\ItemSpawner.cs" />
+     <Compile Include="Assets\Scripts\Enemy\Enemy.cs" />
      <Compile Include="Assets\Scripts\Items\TextFadeAndDelete.cs" />
      <Compile Include="Assets\PathCreator\Examples\Scripts\RoadMeshCreator.cs" />
      <Compile Include="Assets\Scripts\Player\Sonny\OrcController.cs" />

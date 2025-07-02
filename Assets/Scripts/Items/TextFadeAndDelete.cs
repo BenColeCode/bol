@@ -4,19 +4,24 @@ using UnityEngine;
 using TMPro;
 
 
-public class TextFadeAndDelete : MonoBehaviour
+public class TextFadeAndDeleteBillboard : MonoBehaviour
 {
+    private Camera MainCam;
     public TextMeshProUGUI UGUI;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
+        MainCam = Camera.main;
         UGUI = GetComponent<TextMeshProUGUI>();
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        if (MainCam)
+        {
+            transform.LookAt(MainCam.transform.position, Vector3.up);
+        }
     }
 
     void FixedUpdate()

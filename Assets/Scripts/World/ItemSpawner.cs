@@ -18,9 +18,7 @@ public class ItemSpawner : MonoBehaviour
                 Random.Range(10, 100),
                 Random.Range(-100, 100)
             );
-            Debug.Log(items.Count);
 
-            Debug.Log(items[rand]);
 
             Instantiate(items[rand], position, items[rand].transform.rotation);
         }
